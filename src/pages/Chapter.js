@@ -23,7 +23,9 @@ import { makeStyles } from "@material-ui/core/styles";
 import EditIcon from "@material-ui/icons/Edit";
 import DeleteIcon from "@material-ui/icons/Delete";
 import AddCircleIcon from "@material-ui/icons/AddCircle";
+import LinkIcon from "@material-ui/icons/Link";
 import orange from "@material-ui/core/colors/orange";
+import green from "@material-ui/core/colors/green";
 import red from "@material-ui/core/colors/red";
 import lightBlue from "@material-ui/core/colors/lightBlue";
 
@@ -46,7 +48,7 @@ import Select from "@material-ui/core/Select";
 
 import { db, auth } from "../component/firebase";
 
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 // transtation value
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -61,7 +63,6 @@ export default function Chapter() {
   // dialouge value
 
   const [open, setOpen] = React.useState(false);
-  const [loading, setLoading] = React.useState(false);
 
   // fetching data
   let { course } = useParams();
@@ -72,7 +73,6 @@ export default function Chapter() {
       .get()
       .then((x) => {
         const arr = [];
-        setOpen(false);
         x.docs.map((doc) => {
           const obj = {
             year: doc.data().year,
@@ -165,6 +165,9 @@ export default function Chapter() {
                         {column.label}
                       </TableCell>
                     ))}
+                    <TableCell key="go_button" align="center">
+                      Links
+                    </TableCell>
                     <TableCell key="button" align="center">
                       Edit
                     </TableCell>
@@ -201,6 +204,22 @@ export default function Chapter() {
                             </TableCell>
                           );
                         })}
+
+                        <TableCell
+                          key="go_button"
+                          component={Link}
+                          to={`/classes/${course}/${row.id}`}
+                        >
+                          <IconButton
+                            style={{ color: green[500] }}
+                            onClick={() => {
+                              setId(row.id);
+                              setOpen(true);
+                            }}
+                          >
+                            <LinkIcon />
+                          </IconButton>
+                        </TableCell>
                         <TableCell key="button">
                           <IconButton
                             style={{ color: orange[600] }}
@@ -256,7 +275,16 @@ export default function Chapter() {
             </TableContainer>
           </Paper>
         ) : (
-          ""
+          <IconButton
+            style={{ color: lightBlue[600] }}
+            onClick={() => {
+              setId(null);
+              setOpen(true);
+            }}
+          >
+            <AddCircleIcon />
+            <Typography variant="h6">Add Class</Typography>
+          </IconButton>
         )}
       </>
     );
@@ -290,7 +318,7 @@ export default function Chapter() {
         });
         temp = temp[0];
         const obj = {
-          no: temp.no,
+          no: temp.no === undefined ? "" : temp.no,
           name: temp.name === undefined ? "" : temp.name,
           chapter: temp.chapter === undefined ? "" : temp.chapter,
           class_started:

@@ -16,7 +16,20 @@ import { db, auth } from "../component/firebase";
 
 export default function Login() {
   //
-  const [login, setLogin] = React.useState(auth.currentUser ? true : false);
+  const [login, setLogin] = React.useState(true);
+  // auth.onAuthStateChanged((user) => {
+  //   if (user) {
+  //     // User is signed in, see docs for a list of available properties
+  //     // https://firebase.google.com/docs/reference/js/firebase.User
+  //     var uid = user.uid;
+  //     setLogin(true);
+  //     // ...
+  //   } else {
+  //     // User is signed out
+  //     // ...
+  //     setLogin(false);
+  //   }
+  // });
   // form management
   const defaultValues = {
     // name: "",

@@ -3,9 +3,27 @@ import React from "react";
 import { Redirect, Link } from "react-router-dom";
 import { db, auth } from "../component/firebase";
 
+// var login = true;
+// const setLogin = (bool) => {
+//   login = bool;
+// };
+
 export default function Home(props) {
-  //   props.history.push("/login");
-  const [login, setLogin] = React.useState(auth.currentUser ? true : false);
+  const [login, setLogin] = React.useState(true);
+  // auth.onAuthStateChanged((user) => {
+  //   if (user) {
+  //     // User is signed in, see docs for a list of available properties
+  //     // https://firebase.google.com/docs/reference/js/firebase.User
+  //     var uid = user.uid;
+  //     setLogin(true);
+  //     // ...
+  //   } else {
+  //     // User is signed out
+  //     // ...
+  //     setLogin(false);
+  //   }
+  // });
+
   return (
     <div>
       <ul>
