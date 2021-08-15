@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 
 // import ing material component
 import Paper from "@material-ui/core/Paper";
@@ -28,6 +28,7 @@ import orange from "@material-ui/core/colors/orange";
 import green from "@material-ui/core/colors/green";
 import red from "@material-ui/core/colors/red";
 import lightBlue from "@material-ui/core/colors/lightBlue";
+import Alert from "@material-ui/lab/Alert";
 
 import {
   CircularProgress,
@@ -46,9 +47,13 @@ import FormHelperText from "@material-ui/core/FormHelperText";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
 
-import { db, auth } from "../component/firebase";
+import { db } from "../component/firebase";
 
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, Redirect } from "react-router-dom";
+
+// context
+import { useAuth } from "../contexts/AuthContext";
+
 // transtation value
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -59,10 +64,16 @@ const setId = (x) => {
 };
 export default function Chapter() {
   // test data
-  const [chapter, setChapter] = React.useState("");
+  const [chapter, setChapter] = useState("");
   // dialouge value
 
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
+
+  const [error, setError] = useState();
+
+  const [navId, setNavId] = useState();
+
+  const { currentUser } = useAuth();
 
   // fetching data
   let { course } = useParams();
@@ -83,16 +94,24 @@ export default function Chapter() {
             name: doc.data().name,
             total: doc.data().total,
             running: doc.data().running,
-            tags: doc.data().tags,
+            tags: "",
+            // tags: doc.data().tags,
           };
+          for (var tag of doc.data().tags) {
+            obj.tags = obj.tags + " " + tag;
+          }
           arr.push(obj);
         });
         setChapter(arr);
       });
   };
-  React.useEffect(() => {
-    fetch();
-  }, useParams().course);
+  useEffect(() => {
+    if (!currentUser) {
+      setNavId("/login");
+    } else {
+      fetch();
+    }
+  }, []);
   // string to arr
   const striToArr = (str) => {
     if (str != "") {
@@ -134,7 +153,8 @@ export default function Chapter() {
   //   styles
   const useStyles = makeStyles({
     root: {
-      width: "100%",
+      width: "93%",
+      padding: 12,
     },
     container: {
       maxHeight: 600,
@@ -525,6 +545,7 @@ export default function Chapter() {
                       console.log(err);
                     });
                 }
+                setOpen(false);
               }}
               variant="contained"
               color="primary"
@@ -538,12 +559,13 @@ export default function Chapter() {
   };
   return (
     <>
+      {error && <Alert severity="error">{error}</Alert>}
       {chapter !== "" ? (
-        <>
+        <div style={{}}>
           <Chaptable data={filt("primary")} />
           {filt("secondary") ? <Chaptable data={filt("secondary")} /> : ""}
           <Form />
-        </>
+        </div>
       ) : (
         <div
           style={{
@@ -556,6 +578,7 @@ export default function Chapter() {
           <CircularProgress style={{}} />
         </div>
       )}
+      {navId ? <Redirect to={navId} /> : ""}
     </>
   );
 }

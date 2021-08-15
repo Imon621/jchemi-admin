@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useRef, useState } from "react";
 
 import { makeStyles } from "@material-ui/core/styles";
 
@@ -12,31 +12,18 @@ import {
 } from "@material-ui/core";
 import { Redirect } from "react-router-dom";
 
-import { db, auth } from "../component/firebase";
+import { useAuth } from "../contexts/AuthContext";
+
+import Alert from "@material-ui/lab/Alert";
 
 export default function Login() {
   //
-  const [login, setLogin] = React.useState(true);
-  // auth.onAuthStateChanged((user) => {
-  //   if (user) {
-  //     // User is signed in, see docs for a list of available properties
-  //     // https://firebase.google.com/docs/reference/js/firebase.User
-  //     var uid = user.uid;
-  //     setLogin(true);
-  //     // ...
-  //   } else {
-  //     // User is signed out
-  //     // ...
-  //     setLogin(false);
-  //   }
-  // });
+  const [navId, setNavId] = useState();
+  const { login } = useAuth();
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   // form management
   const defaultValues = {
-    // name: "",
-    // age: 0,
-    // sex: "",
-    // os: "",
-    // favoriteNumber: 0,
     email: "",
     password: "",
   };
@@ -48,18 +35,20 @@ export default function Login() {
       [name]: value,
     });
   };
-  const handleSubmit = (e) => {
+  async function handleSubmit(e) {
     e.preventDefault();
-    auth
-      .signInWithEmailAndPassword(formValues.email, formValues.password)
-      .then((cred) => {
-        console.log(cred);
-        setLogin(true);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
+
+    try {
+      setError("");
+      setLoading(true);
+      await login(formValues.email, formValues.password);
+      setNavId("/");
+    } catch {
+      setError("Failed to log in");
+    }
+
+    setLoading(false);
+  }
   //   styling
   const useStyles = makeStyles({
     root: {
@@ -117,6 +106,7 @@ export default function Login() {
                       variant="outlined"
                       color="primary"
                       type="submit"
+                      disabled={loading}
                     >
                       Log In
                     </Button>
@@ -126,7 +116,8 @@ export default function Login() {
             </CardContent>
           </Card>
         </Grid>
-        {login ? <Redirect to="/home" /> : ""}
+        {error && <Alert severity="error">{error}</Alert>}
+        {navId ? <Redirect to={navId} /> : ""}
       </Grid>
     </>
   );

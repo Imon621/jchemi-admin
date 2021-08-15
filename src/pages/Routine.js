@@ -23,12 +23,11 @@ import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
 
-// importing my component
+// my component
 import { db } from "../component/firebase";
 import { filt } from "../component/sorting";
 import Datatable from "../component/Datatable";
 
-import { useParams } from "react-router-dom";
 // transtation value
 const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
@@ -38,42 +37,6 @@ const setId = (x) => {
   id = x;
 };
 
-// test data
-const data = [
-  {
-    id: 1,
-    type: "link",
-    no: 1,
-    name: "basic class",
-    link: "http://www.test.com",
-    date: "12 jun 21",
-  },
-  {
-    id: 2,
-    type: "link",
-    no: 2,
-    name: "2nos class",
-    link: "http://www.test.com",
-    date: "12 jun 21",
-  },
-  {
-    id: 3,
-    type: "link",
-    no: 3,
-    name: "basic class",
-    link: "http://www.test.com",
-    date: "12 jun 21",
-  },
-  {
-    id: 4,
-    type: "link",
-    no: 4,
-    name: "2nos class",
-    link: "http://www.test.com",
-    date: "12 jun 21",
-  },
-];
-
 const columns = [
   { id: "no", label: "No.", minWidth: 50 },
   { id: "name", label: "Topics", minWidth: 150 },
@@ -81,7 +44,7 @@ const columns = [
   { id: "link", label: "Links", minWidth: 50 },
 ];
 
-export default function Classes() {
+export default function Routine() {
   const useStyles = makeStyles({
     root: {
       width: "100%",
@@ -94,20 +57,16 @@ export default function Classes() {
   const styles = useStyles();
   // dialouge value
 
-  const [open, setOpen] = useState(true);
-  const [classes, setClasses] = useState("");
-  let { course, classId } = useParams();
+  const [open, setOpen] = useState(false);
+  const [data, setData] = useState("");
   const [navId, setNavId] = useState();
   const [error, setError] = useState();
-  const [loading, setLoading] = useState();
   const { currentUser } = useAuth();
 
   const fetch = () => {
     db.collection("courses")
-      .doc(course)
-      .collection("chapter")
-      .doc(classId)
-      .collection("classes")
+      .doc("routine")
+      .collection("routine")
       .get()
       .then((x) => {
         const arr = [];
@@ -122,8 +81,7 @@ export default function Classes() {
           };
           arr.push(obj);
         });
-        setClasses(arr);
-        setOpen(false);
+        setData(arr);
       });
   };
 
@@ -147,25 +105,21 @@ export default function Classes() {
   };
   const del = (delId) => {
     try {
-      setLoading(true);
       db.collection("courses")
-        .doc(course)
-        .collection("chapter")
-        .doc(classId)
-        .collection("classes")
+        .doc("routine")
+        .collection("routine")
         .doc(delId)
         .delete();
     } catch (err) {
       setError("failed to delete data");
     }
     fetch();
-    setLoading(false);
   };
 
   //   data column
   const columns = [
     { id: "no", label: "No.", minWidth: 50 },
-    { id: "name", label: "Name", minWidth: 100 },
+    { id: "name", label: "Notice/Routine", minWidth: 100 },
     { id: "date", label: "Date", minWidth: 60 },
     { id: "link", label: "Link", minWidth: 50 },
   ];
@@ -186,7 +140,7 @@ export default function Classes() {
     };
     const [formValues, setFormValues] = React.useState(() => {
       if (id !== null) {
-        var temp = classes.filter((x) => {
+        var temp = data.filter((x) => {
           if (x.id === id) {
             return true;
           }
@@ -215,36 +169,29 @@ export default function Classes() {
       e.preventDefault();
       if (id === null) {
         try {
-          setLoading(true);
           db.collection("courses")
-            .doc(course)
-            .collection("chapter")
-            .doc(classId)
-            .collection("classes")
+            .doc("routine")
+            .collection("routine")
             .add(formValues);
         } catch (err) {
           setError("failed to add data");
         }
-        setLoading(false);
         setError(null);
         fetch();
       } else {
         try {
-          setLoading(true);
           db.collection("courses")
-            .doc(course)
-            .collection("chapter")
-            .doc(classId)
-            .collection("classes")
+            .doc("routine")
+            .collection("routine")
             .doc(id)
             .update(formValues);
         } catch (err) {
           setError("failed to edit data");
         }
-        setLoading(false);
         setError(null);
         fetch();
       }
+      setOpen(false);
     };
     return (
       <>
@@ -286,10 +233,8 @@ export default function Classes() {
                       value={formValues.type}
                       onChange={handleInputChange}
                     >
-                      <MenuItem value="link">Class Link</MenuItem>
-                      <MenuItem value="pdf">PDF Link</MenuItem>
-                      <MenuItem value="exam">Exam Link</MenuItem>
-                      <MenuItem value="msg">Massage</MenuItem>
+                      <MenuItem value="routine">Routine</MenuItem>
+                      <MenuItem value="notice">Notice</MenuItem>
                     </Select>
                   </FormControl>
                 </Grid>
@@ -328,7 +273,6 @@ export default function Classes() {
           </DialogContent>
           <DialogActions>
             <Button
-              disabled={loading}
               onClick={() => {
                 setId(null);
                 setOpen(false);
@@ -338,12 +282,7 @@ export default function Classes() {
             >
               Cancel
             </Button>
-            <Button
-              disabled={loading}
-              onClick={handleSubmit}
-              variant="contained"
-              color="primary"
-            >
+            <Button onClick={handleSubmit} variant="contained" color="primary">
               {id !== null ? "Edit" : "Add"}
             </Button>
           </DialogActions>
@@ -353,49 +292,29 @@ export default function Classes() {
   };
   return (
     <>
-      {classes !== "" ? (
+      {data !== "" ? (
         <div style={{ width: "93%" }}>
           {error && <Alert severity="error">{error}</Alert>}
-          <Datatable
-            data={filt("link", classes)}
-            columns={columns}
-            edit={edit}
-            del={del}
-            loading={loading}
-            editable={true}
-          />
           <Form />
-          {filt("exam", classes).length !== 0 ? (
+          {filt("routine", data).length !== 0 ? (
             <Datatable
-              data={filt("exam", classes)}
+              data={filt("routine", data)}
               columns={columns}
               edit={edit}
               del={del}
-              loading={loading}
+              loading={false}
               editable={true}
             />
           ) : (
             ""
           )}
-          {filt("pdf", classes).length !== 0 ? (
+          {filt("notice", data).length !== 0 ? (
             <Datatable
-              data={filt("pdf", classes)}
+              data={filt("notice", data)}
               columns={columns}
               edit={edit}
               del={del}
-              loading={loading}
-              editable={true}
-            />
-          ) : (
-            ""
-          )}
-          {filt("msg", classes).length !== 0 ? (
-            <Datatable
-              data={filt("msg", classes)}
-              columns={columns}
-              edit={edit}
-              del={del}
-              loading={loading}
+              loading={false}
               editable={true}
             />
           ) : (
