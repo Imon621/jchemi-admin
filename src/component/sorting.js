@@ -5,6 +5,13 @@ const sorter = (arr) => {
   });
   return arr;
 };
+// reverse sorter
+const revSorter = (arr) => {
+  arr.sort((a, b) => {
+    return b.no - a.no;
+  });
+  return arr;
+};
 // type filtering data
 const filt = (type, array) => {
   const arr = [];
@@ -16,4 +23,4 @@ const filt = (type, array) => {
   return arr;
 };
 
-export { sorter, filt };
+export { sorter, revSorter, filt };
