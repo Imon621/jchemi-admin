@@ -8,6 +8,7 @@ import Home from "./pages/Home";
 import Chapter from "./pages/Chapter";
 import Classes from "./pages/Classes";
 import Routine from "./pages/Routine";
+import Logs from "./pages/Logs";
 
 function App() {
   return (
@@ -22,6 +23,9 @@ function App() {
           </Route>
           <Route path="/routine">
             <Routine />
+          </Route>
+          <Route path="/logs">
+            <Logs />
           </Route>
           <Route path="/chapter/:course">
             <Chapter />

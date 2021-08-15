@@ -163,9 +163,14 @@ export default function Datatable({
       ) : (
         <>
           {editable ? (
-            <IconButton style={{ color: lightBlue[600] }} onClick={edit}>
+            <IconButton
+              style={{ color: lightBlue[600] }}
+              onClick={() => {
+                edit();
+              }}
+            >
               <AddCircleIcon />
-              <Typography variant="h6">Add {data[0].type}</Typography>
+              <Typography variant="h6">Add Link</Typography>
             </IconButton>
           ) : (
             ""

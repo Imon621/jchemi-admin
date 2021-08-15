@@ -147,7 +147,7 @@ export default function Routine() {
         });
         temp = temp[0];
         const obj = {
-          no: temp.no,
+          no: temp.no === undefined ? "" : temp.no,
           name: temp.name === undefined ? "" : temp.name,
           type: temp.type === undefined ? "" : temp.type,
           date: temp.date === undefined ? "" : temp.date,

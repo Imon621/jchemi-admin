@@ -45,6 +45,9 @@ export default function Home(props) {
         <li>
           <Link to="/routine">routine and notices</Link>
         </li>
+        <li>
+          <Link to="/logs">Logs</Link>
+        </li>
       </ul>
       <Button
         variant="contained"
