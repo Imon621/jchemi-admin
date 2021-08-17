@@ -201,7 +201,13 @@ export default function Classes() {
         };
         return obj;
       } else {
-        return defaultValues;
+        const temp = defaultValues;
+        const d = new Date();
+        temp.date = `${d.getDate().toString()}/${d.getMonth().toString()}/${d
+          .getFullYear()
+          .toString()}`;
+        temp.type = "link";
+        return temp;
       }
     });
     const handleInputChange = (e) => {

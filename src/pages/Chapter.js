@@ -303,7 +303,7 @@ export default function Chapter() {
             }}
           >
             <AddCircleIcon />
-            <Typography variant="h6">Add Class</Typography>
+            <Typography variant="h6">Add Chapter</Typography>
           </IconButton>
         )}
       </>
@@ -352,7 +352,14 @@ export default function Chapter() {
         };
         return obj;
       } else {
-        return defaultValues;
+        const temp = defaultValues;
+        const d = new Date();
+        temp.class_started = `${d.getDate().toString()}/${d
+          .getMonth()
+          .toString()}/${d.getFullYear().toString()}`;
+        temp.year = "primary";
+        temp.running = true;
+        return temp;
       }
     });
     const check = () => {};
@@ -563,7 +570,11 @@ export default function Chapter() {
       {chapter !== "" ? (
         <div style={{}}>
           <Chaptable data={filt("primary")} />
-          {filt("secondary") ? <Chaptable data={filt("secondary")} /> : ""}
+          {filt("secondary").length !== 0 ? (
+            <Chaptable data={filt("secondary")} />
+          ) : (
+            ""
+          )}
           <Form />
         </div>
       ) : (
