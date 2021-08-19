@@ -24,7 +24,7 @@ import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
 
 // my component
-import { db } from "../component/firebase";
+import { clsUpdate, db } from "../component/firebase";
 import { filt } from "../component/sorting";
 import Datatable from "../component/Datatable";
 
@@ -36,6 +36,8 @@ var id = null;
 const setId = (x) => {
   id = x;
 };
+
+var globleObj = {};
 
 const columns = [
   { id: "no", label: "No.", minWidth: 50 },
@@ -66,21 +68,10 @@ export default function Routine() {
   const fetch = () => {
     db.collection("courses")
       .doc("routine")
-      .collection("routine")
       .get()
       .then((x) => {
-        const arr = [];
-        x.docs.map((doc) => {
-          const obj = {
-            type: doc.data().type,
-            id: doc.id,
-            no: doc.data().no,
-            date: doc.data().date,
-            link: doc.data().link,
-            name: doc.data().name,
-          };
-          arr.push(obj);
-        });
+        globleObj = x.data();
+        const arr = x.data().routine === undefined ? [] : x.data().routine;
         setData(arr);
       });
   };
@@ -105,11 +96,17 @@ export default function Routine() {
   };
   const del = (delId) => {
     try {
-      db.collection("courses")
-        .doc("routine")
-        .collection("routine")
-        .doc(delId)
-        .delete();
+      // db.collection("courses")
+      //   .doc("routine")
+      //   .collection("routine")
+      //   .doc(delId)
+      //   .delete();
+      const arr = data;
+      const nwarr = arr.filter((x) => {
+        return x.id !== delId;
+      });
+      globleObj.routine = nwarr;
+      clsUpdate(`courses/routine`, globleObj);
     } catch (err) {
       setError("failed to delete data");
     }
@@ -167,28 +164,44 @@ export default function Routine() {
     };
     const handleSubmit = (e) => {
       e.preventDefault();
+      setError(null);
       if (id === null) {
         try {
-          db.collection("courses")
-            .doc("routine")
-            .collection("routine")
-            .add(formValues);
+          // db.collection("courses")
+          //   .doc("routine")
+          //   .collection("routine")
+          //   .add(formValues);
+          const arr = data;
+          arr.push({
+            ...formValues,
+            id: new Date().getTime().toString(),
+          });
+          globleObj.routine = arr;
+          clsUpdate(`courses/routine`, globleObj);
         } catch (err) {
           setError("failed to add data");
         }
-        setError(null);
         fetch();
       } else {
         try {
-          db.collection("courses")
-            .doc("routine")
-            .collection("routine")
-            .doc(id)
-            .update(formValues);
+          // db.collection("courses")
+          //   .doc("routine")
+          //   .collection("routine")
+          //   .doc(id)
+          //   .update(formValues);
+          const arr = data;
+          const nwarr = arr.map((x) => {
+            if (x.id === id) {
+              return { ...formValues, id: id };
+            } else {
+              return x;
+            }
+          });
+          globleObj.routine = nwarr;
+          clsUpdate(`courses/routine`, globleObj);
         } catch (err) {
           setError("failed to edit data");
         }
-        setError(null);
         fetch();
       }
       setOpen(false);
@@ -296,18 +309,14 @@ export default function Routine() {
         <div style={{ width: "93%" }}>
           {error && <Alert severity="error">{error}</Alert>}
           <Form />
-          {filt("routine", data).length !== 0 ? (
-            <Datatable
-              data={filt("routine", data)}
-              columns={columns}
-              edit={edit}
-              del={del}
-              loading={false}
-              editable={true}
-            />
-          ) : (
-            ""
-          )}
+          <Datatable
+            data={filt("routine", data)}
+            columns={columns}
+            edit={edit}
+            del={del}
+            loading={false}
+            editable={true}
+          />
           {filt("notice", data).length !== 0 ? (
             <Datatable
               data={filt("notice", data)}

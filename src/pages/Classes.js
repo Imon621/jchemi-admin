@@ -24,7 +24,7 @@ import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
 
 // importing my component
-import { db } from "../component/firebase";
+import { clsUpdate, db } from "../component/firebase";
 import { filt } from "../component/sorting";
 import Datatable from "../component/Datatable";
 
@@ -37,6 +37,7 @@ var id = null;
 const setId = (x) => {
   id = x;
 };
+var globleObj = {};
 
 // test data
 const data = [
@@ -107,21 +108,10 @@ export default function Classes() {
       .doc(course)
       .collection("chapter")
       .doc(classId)
-      .collection("classes")
       .get()
       .then((x) => {
-        const arr = [];
-        x.docs.map((doc) => {
-          const obj = {
-            type: doc.data().type,
-            id: doc.id,
-            no: doc.data().no,
-            date: doc.data().date,
-            link: doc.data().link,
-            name: doc.data().name,
-          };
-          arr.push(obj);
-        });
+        globleObj = x.data();
+        const arr = x.data().classes === undefined ? [] : x.data().classes;
         setClasses(arr);
         setOpen(false);
       });
@@ -148,13 +138,12 @@ export default function Classes() {
   const del = (delId) => {
     try {
       setLoading(true);
-      db.collection("courses")
-        .doc(course)
-        .collection("chapter")
-        .doc(classId)
-        .collection("classes")
-        .doc(delId)
-        .delete();
+      const arr = classes;
+      const nwarr = arr.filter((x) => {
+        return x.id !== delId;
+      });
+      globleObj.classes = nwarr;
+      clsUpdate(`courses/${course}/chapter/${classId}`, globleObj);
     } catch (err) {
       setError("failed to delete data");
     }
@@ -219,36 +208,39 @@ export default function Classes() {
     };
     const handleSubmit = (e) => {
       e.preventDefault();
+      setError(null);
       if (id === null) {
         try {
           setLoading(true);
-          db.collection("courses")
-            .doc(course)
-            .collection("chapter")
-            .doc(classId)
-            .collection("classes")
-            .add(formValues);
+          const arr = classes;
+          arr.push({
+            ...formValues,
+            id: new Date().getTime().toString(),
+          });
+          globleObj.classes = arr;
+          clsUpdate(`courses/${course}/chapter/${classId}`, globleObj);
         } catch (err) {
           setError("failed to add data");
         }
         setLoading(false);
-        setError(null);
         fetch();
       } else {
         try {
           setLoading(true);
-          db.collection("courses")
-            .doc(course)
-            .collection("chapter")
-            .doc(classId)
-            .collection("classes")
-            .doc(id)
-            .update(formValues);
+          const arr = classes;
+          const nwarr = arr.map((x) => {
+            if (x.id === id) {
+              return { ...formValues, id: id };
+            } else {
+              return x;
+            }
+          });
+          globleObj.classes = nwarr;
+          clsUpdate(`courses/${course}/chapter/${classId}`, globleObj);
         } catch (err) {
           setError("failed to edit data");
         }
         setLoading(false);
-        setError(null);
         fetch();
       }
     };
